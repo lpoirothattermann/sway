@@ -578,6 +578,7 @@ static void handle_tablet_tool_position(struct sway_cursor *cursor,
 	} else {
 		wlr_tablet_v2_tablet_tool_notify_proximity_out(tool->tablet_v2_tool);
 		pointer_motion(cursor, time_msec, input_device->wlr_device, dx, dy, dx, dy);
+		wlr_seat_pointer_notify_frame(cursor->seat->wlr_seat);
 	}
 }
 
@@ -643,6 +644,11 @@ static void handle_tool_tip(struct wl_listener *listener, void *data) {
 	cursor_handle_activity_from_device(cursor, &event->tablet->base);
 
 	struct sway_tablet_tool *sway_tool = event->tool->data;
+	if (!sway_tool) {
+		sway_log(SWAY_DEBUG, "tool tip before proximity");
+		return;
+	}
+
 	struct wlr_tablet_v2_tablet *tablet_v2 = sway_tool->tablet->tablet_v2;
 	struct sway_seat *seat = cursor->seat;
 
